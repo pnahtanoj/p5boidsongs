@@ -1,25 +1,33 @@
-import { Vector } from 'p5';
+import * as p5 from 'p5';
+import { NoteGenerator } from './NoteGenerator';
 
 export class Mover {
-  bounds: Vector;
+  p: any;
+  bounds: p5.Vector;
 
-  location: Vector;
-  velocity: Vector;
-  acceleration: Vector;
+  location: p5.Vector;
+  velocity: p5.Vector;
+  acceleration: p5.Vector;
 
   topspeed = 10;
   size = 10;
+  r = 0;
+  g = 0;
+  b = 0;
+
+  // env = new p5.Envelope();
+  // osc = new p5.Oscillator();
 
   constructor(
-    private p: any,
-    private canvas: Vector) {
+    p: any,
+    private canvas: p5.Vector) {
 
     this.p = p;
     this.bounds = canvas.copy();
 
-    this.location = new Vector();
-    this.velocity = new Vector();
-    this.acceleration = new Vector();
+    this.location = new p5.Vector();
+    this.velocity = new p5.Vector();
+    this.acceleration = new p5.Vector();
 
     this.location.x = this.p.random(this.bounds.x);
     this.location.y = this.p.random(this.bounds.y);
@@ -40,8 +48,6 @@ export class Mover {
   }
 
   update() {
-    // this.acceleration = Vector.random2D();
-    // this.acceleration.mult(0.1);
     this.velocity.add(this.acceleration);
     this.location.add(this.velocity);
 
@@ -52,32 +58,33 @@ export class Mover {
   }
 
   display() {
-    this.p.stroke(0);
-    this.p.fill(0);
+    this.p.stroke(this.r, this.g, this.b);
+    this.p.fill(this.r, this.g, this.b);
     this.p.ellipse(this.location.x, this.location.y, this.size, this.size);
   }
 
   checkEdgesClosed() {
-    this.velocity.x = (this.location.x > this.bounds.x || this.location.x < 0)
+    const switchX = (this.location.x > this.bounds.x || this.location.x < 0);
+    const switchY = (this.location.y > this.bounds.y || this.location.y < 0);
+    this.velocity.x = switchX
       ? this.velocity.x * -1
       : this.velocity.x;
 
-    this.velocity.y = (this.location.y > this.bounds.y || this.location.y < 0)
+    this.velocity.y = switchY
       ? this.velocity.y * -1
       : this.velocity.y;
+
+    if (switchX || switchY) {
+      this.changeDirectionOccured(switchX, switchY);
+    }
   }
 
-  checkEdges() {
-    this.location.x = (this.location.x > this.bounds.x)
-      ? 0
-      : (this.location.x < 0)
-        ? (this.bounds.x)
-        : this.location.x;
+  changeDirectionOccured(x, y) {
+  }
 
-    this.location.y = (this.location.y > this.bounds.y)
-      ? 0
-      : (this.location.y < 0)
-        ? (this.bounds.y)
-        : this.location.y;
+  changeColor() {
+    this.r = this.p.random(255);
+    this.g = this.p.random(255);
+    this.b = this.p.random(255);
   }
 }

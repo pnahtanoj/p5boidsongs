@@ -3,6 +3,7 @@ import * as p5 from 'p5';
 import "p5/lib/addons/p5.sound";
 import "p5/lib/addons/p5.dom";
 import { Mover } from './model/Mover';
+import { BoidMover } from './model/BoidMover';
 
 const canvas: p5.Vector = new p5.Vector();
 canvas.x = 1200;
@@ -16,8 +17,10 @@ const speedSliderLocation: p5.Vector = new p5.Vector();
 speedSliderLocation.x = canvas.x - 170;
 speedSliderLocation.y = canvas.y - 100;
 
-const startingMoverCount = 20;
+const topCount = 40;
+const startingMoverCount = 10;
 const startingSpeed = 20;
+const topSpeed = 30;
 
 @Component({
   selector: 'app-root',
@@ -36,7 +39,6 @@ export class AppComponent {
   }
 
   private sketch(p: any) {
-    const count = 50;
     let movers: Mover[] = [];
     let countSlider, speedSlider;
     let prevSpeed = 0;
@@ -45,15 +47,27 @@ export class AppComponent {
       p.createCanvas(canvas.x, canvas.y);
       p.loadSound('');
 
-      countSlider = p.createSlider(1, 100, startingMoverCount);
+      countSlider = p.createSlider(1, topCount, startingMoverCount);
       countSlider.position(countSliderLocation.x + 20, countSliderLocation.y);
 
-      speedSlider = p.createSlider(1, 100, startingSpeed);
+      speedSlider = p.createSlider(1, topSpeed, startingSpeed);
       speedSlider.position(speedSliderLocation.x + 20, speedSliderLocation.y);
+
+      // const osc = new p5.Oscillator();
+      // const env = new p5.Envelope();
+
+      // env.setADSR(0.05, 0.05, 0.5, 0.12);
+      // env.setRange(0.5, 0);
+
+      // osc.setType('sine');
+      // osc.start();
+      // osc.freq(NoteTree[0][3]);
+      // osc.amp(0.1);
+      // env.play(osc);
     };
 
     p.draw = () => {
-      p.background(100);
+      p.background(200);
 
       const count = countSlider.value();
       const currSpeed = speedSlider.value();
@@ -81,6 +95,7 @@ export class AppComponent {
       p.textSize(25);
       p.textAlign(p.RIGHT, p.CENTER);
       p.fill(0);
+      p.stroke(0);
       p.text('movers', countSliderLocation.x, countSliderLocation.y);
       p.text('speed', speedSliderLocation.x, speedSliderLocation.y);
     }
@@ -95,7 +110,7 @@ export class AppComponent {
 
     function generateMovers(count: number, speed: number) {
       return Array.apply(null, { length: count })
-        .map(i => new Mover(p, canvas));
+        .map(i => new BoidMover(p, canvas));
     }
   }
 }
