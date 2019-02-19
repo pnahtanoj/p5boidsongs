@@ -4,13 +4,12 @@ import { NoteGenerator } from './NoteGenerator';
 export class Mover {
   p: any;
   bounds: p5.Vector;
-
+  radius: number;
   location: p5.Vector;
   velocity: p5.Vector;
   acceleration: p5.Vector;
 
   topspeed = 10;
-  size = 10;
   r = 0;
   g = 0;
   b = 0;
@@ -20,10 +19,12 @@ export class Mover {
 
   constructor(
     p: any,
-    private canvas: p5.Vector) {
+    private canvas: p5.Vector,
+    radius: number = 50) {
 
     this.p = p;
     this.bounds = canvas.copy();
+    this.radius = radius;
 
     this.location = new p5.Vector();
     this.velocity = new p5.Vector();
@@ -60,12 +61,20 @@ export class Mover {
   display() {
     this.p.stroke(this.r, this.g, this.b);
     this.p.fill(this.r, this.g, this.b);
-    this.p.ellipse(this.location.x, this.location.y, this.size, this.size);
+    this.p.ellipse(this.location.x, this.location.y, this.radius, this.radius);
   }
 
   checkEdgesClosed() {
-    const switchX = (this.location.x > this.bounds.x || this.location.x < 0);
-    const switchY = (this.location.y > this.bounds.y || this.location.y < 0);
+    const switchX = (
+      (this.location.x + this.radius >= this.bounds.x && this.velocity.x > 0) ||
+      (this.location.x - this.radius <= 0 && this.velocity.x < 0)
+    );
+
+    const switchY = (
+      (this.location.y + this.radius >= this.bounds.y && this.velocity.y > 0) ||
+      (this.location.y - this.radius <= 0 && this.velocity.y < 0)
+    );
+
     this.velocity.x = switchX
       ? this.velocity.x * -1
       : this.velocity.x;
@@ -73,6 +82,14 @@ export class Mover {
     this.velocity.y = switchY
       ? this.velocity.y * -1
       : this.velocity.y;
+
+    if (switchX) {
+      console.log(`SWITCH X: ${this.location.x} ${this.radius} ${this.bounds.x} `)
+    }
+
+    if (switchY) {
+      console.log(`SWITCH Y: ${this.location.y} ${this.radius} ${this.bounds.y} `)
+    }
 
     if (switchX || switchY) {
       this.changeDirectionOccured(switchX, switchY);

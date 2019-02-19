@@ -39,13 +39,16 @@ export class AppComponent {
   }
 
   private sketch(p: any) {
+    // objects
     let movers: Mover[] = [];
+    let planets: Mover[] = [];
+
+    // controls
     let countSlider, speedSlider;
     let prevSpeed = 0;
 
     p.setup = () => {
       p.createCanvas(canvas.x, canvas.y);
-      p.loadSound('');
 
       countSlider = p.createSlider(1, topCount, startingMoverCount);
       countSlider.position(countSliderLocation.x + 20, countSliderLocation.y);
@@ -53,17 +56,12 @@ export class AppComponent {
       speedSlider = p.createSlider(1, topSpeed, startingSpeed);
       speedSlider.position(speedSliderLocation.x + 20, speedSliderLocation.y);
 
-      // const osc = new p5.Oscillator();
-      // const env = new p5.Envelope();
-
-      // env.setADSR(0.05, 0.05, 0.5, 0.12);
-      // env.setRange(0.5, 0);
-
-      // osc.setType('sine');
-      // osc.start();
-      // osc.freq(NoteTree[0][3]);
-      // osc.amp(0.1);
-      // env.play(osc);
+      planets.push(new Mover(p, canvas, 150))
+      planets.push(new Mover(p, canvas, 200))
+      planets.push(new Mover(p, canvas, 250))
+      planets[0].setSpeed(convertSpeed(1))
+      planets[1].setSpeed(convertSpeed(1))
+      planets[2].setSpeed(convertSpeed(1))
     };
 
     p.draw = () => {
@@ -82,6 +80,7 @@ export class AppComponent {
       }
 
       movers.forEach(m => m.update())
+      planets.forEach(m => m.update());
 
       updateControls(p);
       prevSpeed = speedSlider.value();
@@ -110,7 +109,7 @@ export class AppComponent {
 
     function generateMovers(count: number, speed: number) {
       return Array.apply(null, { length: count })
-        .map(i => new BoidMover(p, canvas));
+        .map(i => new BoidMover(p, canvas, 10));
     }
   }
 }

@@ -8,7 +8,7 @@ export class NoteGenerator {
     const scaleNotes = ScaleNotes[scale];
     const noteInScale = scaleNotes[Math.floor(this.p.random(scaleNotes.length))];
 
-    console.log(`GRN: ${scaleNotes} ${noteInScale} ${octave}`);
+    // console.log(`GRN: ${scaleNotes} ${noteInScale} ${octave}`);
 
     return NoteTree[noteInScale + Notes[key]][octave];
   }

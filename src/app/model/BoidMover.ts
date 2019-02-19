@@ -7,15 +7,16 @@ export class BoidMover extends Mover {
   env = new p5.Envelope();
   osc = new p5.Oscillator();
 
-  constructor(p: any, canvas: p5.Vector) {
-    super(p, canvas);
+  constructor(p: any, canvas: p5.Vector, radius: number = 50) {
+    super(p, canvas, radius);
   }
 
   changeDirectionOccured(x, y) {
+    this.osc.setType('sine');
     this.env.setADSR(0.05, 0.05, 0.5, 0.12);
     this.env.setRange(0.5, 0);
 
-    this.osc.setType('sine');
+    this.osc.amp(0);
     this.osc.start();
     this.osc.freq(this.generateNote());
 
