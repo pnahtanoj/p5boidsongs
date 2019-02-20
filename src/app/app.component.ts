@@ -29,25 +29,28 @@ const topSpeed = 30;
 })
 export class AppComponent {
   p5: any;
+  closure = 'TETING!@';
+  planets: Mover[] = [];
+  movers: Mover[] = [];
 
   ngOnInit() {
     this.createCanvas();
   }
 
   private createCanvas() {
-    this.p5 = new p5(this.sketch);
+    this.p5 = new p5(this.sketch.bind(this));
   }
 
   private sketch(p: any) {
+    console.log(this.closure);
     // objects
-    let movers: Mover[] = [];
-    let planets: Mover[] = [];
 
     // controls
     let countSlider, speedSlider;
     let prevSpeed = 0;
 
     p.setup = () => {
+      console.log('INSIDE: ', this.closure);
       p.createCanvas(canvas.x, canvas.y);
 
       countSlider = p.createSlider(1, topCount, startingMoverCount);
@@ -56,12 +59,12 @@ export class AppComponent {
       speedSlider = p.createSlider(1, topSpeed, startingSpeed);
       speedSlider.position(speedSliderLocation.x + 20, speedSliderLocation.y);
 
-      planets.push(new Mover(p, canvas, 150))
-      planets.push(new Mover(p, canvas, 200))
-      planets.push(new Mover(p, canvas, 250))
-      planets[0].setSpeed(convertSpeed(1))
-      planets[1].setSpeed(convertSpeed(1))
-      planets[2].setSpeed(convertSpeed(1))
+      this.planets.push(new Mover(p, canvas, 150))
+      this.planets.push(new Mover(p, canvas, 200))
+      this.planets.push(new Mover(p, canvas, 250))
+      this.planets[0].setSpeed(this.convertSpeed(1))
+      this.planets[1].setSpeed(this.convertSpeed(1))
+      this.planets[2].setSpeed(this.convertSpeed(1))
     };
 
     p.draw = () => {
@@ -70,25 +73,21 @@ export class AppComponent {
       const count = countSlider.value();
       const currSpeed = speedSlider.value();
 
-      if (count != movers.length) {
-        movers = updatedMoverList(count - movers.length);
-        movers.forEach(m => m.setSpeed(convertSpeed(currSpeed)));
+      if (count != this.movers.length) {
+        this.movers = this.updatedMoverList(p, count - this.movers.length);
+        this.movers.forEach(m => m.setSpeed(this.convertSpeed(currSpeed)));
       }
 
       if (prevSpeed !== currSpeed) {
-        movers.forEach(m => m.setSpeed(convertSpeed(currSpeed)));
+        this.movers.forEach(m => m.setSpeed(this.convertSpeed(currSpeed)));
       }
 
-      movers.forEach(m => m.update())
-      planets.forEach(m => m.update());
+      this.movers.forEach(m => m.update())
+      this.planets.forEach(m => m.update());
 
       updateControls(p);
       prevSpeed = speedSlider.value();
     };
-
-    function convertSpeed(speed: number): number {
-      return speed / 10;
-    }
 
     function updateControls(p: any) {
       p.textSize(25);
@@ -99,17 +98,23 @@ export class AppComponent {
       p.text('speed', speedSliderLocation.x, speedSliderLocation.y);
     }
 
-    function updatedMoverList(diff: number): Mover[] {
-      if (diff < 0) {
-        return [...movers.slice(0, movers.length + diff)];
-      } else {
-        return [...movers, ...generateMovers(diff, convertSpeed(speedSlider.value()))];
-      }
-    }
+  }
 
-    function generateMovers(count: number, speed: number) {
-      return Array.apply(null, { length: count })
-        .map(i => new BoidMover(p, canvas, 10));
+  convertSpeed(speed: number): number {
+    return speed / 10;
+  }
+
+  generateMovers(p: any, count: number, speed: number) {
+    return Array.apply(null, { length: count })
+      .map(i => new BoidMover(p, canvas, 10));
+  }
+
+  updatedMoverList(p: any, diff: number): Mover[] {
+    if (diff < 0) {
+      return [...this.movers.slice(0, this.movers.length + diff)];
+    } else {
+      return [...this.movers, ...this.generateMovers(p, diff, this.convertSpeed(5))];
+      // return [...this.movers, ...this.generateMovers(diff, this.convertSpeed(speedSlider.value()))];
     }
   }
 }

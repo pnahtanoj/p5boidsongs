@@ -1,10 +1,11 @@
 import * as p5 from 'p5';
 import { NoteGenerator } from './NoteGenerator';
+import { BoidMover } from './BoidMover';
 
 export class Mover {
   p: any;
   bounds: p5.Vector;
-  radius: number;
+  diameter: number;
   location: p5.Vector;
   velocity: p5.Vector;
   acceleration: p5.Vector;
@@ -20,21 +21,42 @@ export class Mover {
   constructor(
     p: any,
     private canvas: p5.Vector,
-    radius: number = 50) {
+    diameter: number = 50) {
 
     this.p = p;
     this.bounds = canvas.copy();
-    this.radius = radius;
+    this.diameter = diameter;
 
     this.location = new p5.Vector();
     this.velocity = new p5.Vector();
     this.acceleration = new p5.Vector();
 
-    this.location.x = this.p.random(this.bounds.x);
-    this.location.y = this.p.random(this.bounds.y);
+    const x = this.p.random(this.bounds.x);
+    const y = this.p.random(this.bounds.y);
+
+    this.location.x = (x - this.radius < 0)
+      ? 0 + + this.radius
+      : ((x + this.radius > this.bounds.x))
+        ? this.bounds.x - this.radius
+        : x;
+
+    this.location.y = (y - this.radius < 0)
+      ? 0 + this.radius
+      : ((y + this.radius > this.bounds.y))
+        ? this.bounds.y - this.radius
+        : y;
+
+    // if (this.diameter >= 150) {
+    //   console.log(`${(x - this.radius < 0)} ${(x + this.radius > this.bounds.x)} ${(y - this.radius < 0)} ${(y + this.radius > this.bounds.y)}`);
+    //   console.log(this.radius);
+    // }
 
     this.setSpeed(0);
     this.setAcceleration();
+  }
+
+  get radius(): number {
+    return this.diameter / 2;
   }
 
   setSpeed(speed: number) {
@@ -61,7 +83,7 @@ export class Mover {
   display() {
     this.p.stroke(this.r, this.g, this.b);
     this.p.fill(this.r, this.g, this.b);
-    this.p.ellipse(this.location.x, this.location.y, this.radius, this.radius);
+    this.p.ellipse(this.location.x, this.location.y, this.diameter, this.diameter);
   }
 
   checkEdgesClosed() {
@@ -83,13 +105,15 @@ export class Mover {
       ? this.velocity.y * -1
       : this.velocity.y;
 
-    if (switchX) {
-      console.log(`SWITCH X: ${this.location.x} ${this.radius} ${this.bounds.x} `)
-    }
+    // if (this.radius >= 150) {
+    //   if (switchX) {
+    //     console.log(`SWITCH X: ${this.location.x} ${this.radius} ${this.bounds.x} `)
+    //   }
 
-    if (switchY) {
-      console.log(`SWITCH Y: ${this.location.y} ${this.radius} ${this.bounds.y} `)
-    }
+    //   if (switchY) {
+    //     console.log(`SWITCH Y: ${this.location.y} ${this.radius} ${this.bounds.y} `)
+    //   }
+    // }
 
     if (switchX || switchY) {
       this.changeDirectionOccured(switchX, switchY);
