@@ -18,6 +18,10 @@ export const Notes = {
   B: 11
 }
 
+export const NumberToNotes = [
+  'C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'
+];
+
 // Supports 9 Octaves
 export const NoteTree = {
   0: {

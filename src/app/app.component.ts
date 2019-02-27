@@ -75,7 +75,8 @@ export class AppComponent {
         .subscribe()
 
       this.planets.generateNonOverlapping(3, [150, 250], canvas);
-      this.planets.setRandomSpeeds(0.2);
+      this.planets.setRandomSpeeds(0.8);
+      this.planets.initKey();
 
       p.createCanvas(canvas.x, canvas.y);
 
@@ -91,9 +92,12 @@ export class AppComponent {
 
       this.planets.update();
 
-      if (p.frameCount % 80) {
-        this.planets.fadeColorsTowardDestination();
-        this.bg = this.color.migrateColor(this.bg, this.bgDestination);
+      this.planets.fadeNotesTowardDestination();
+      this.planets.fadeColorsTowardDestination();
+      this.bg = this.color.migrateColor(this.bg, this.bgDestination);
+
+      if (p.frameCount % 50 === 0) {
+        this.planets.updateFilters();
       }
 
       this.planets.display();

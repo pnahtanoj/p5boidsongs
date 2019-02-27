@@ -68,7 +68,9 @@ export class MoverService {
     });
   }
 
-  checkCollision(m: Mover, other: Mover) {
+  checkCollision(m: Mover, other: Mover): boolean {
+    let isCollision = false;
+
     // Get distances between the balls components
     const distanceVect = p5.Vector.sub(other.location, m.location);
 
@@ -79,6 +81,8 @@ export class MoverService {
     const minDistance = m.radius + other.radius;
 
     if (distanceVectMag < minDistance) {
+      isCollision = true;
+
       // he splits diff between movers...
       const distanceCorrection = (minDistance - distanceVectMag) / 2.0;
       const d = distanceVect.copy();
@@ -161,5 +165,7 @@ export class MoverService {
       other.velocity.x = cosine * vFinal[1].x - sine * vFinal[1].y;
       other.velocity.y = cosine * vFinal[1].y + sine * vFinal[1].x;
     }
+
+    return isCollision;
   }
 }
