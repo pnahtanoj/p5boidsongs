@@ -100,7 +100,8 @@ export class PlanetService {
 
   getFilterValue(p: Mover) {
     this.noiseOffset += 0.1;
-    const newFrequency = this.pService.p.map(this.pService.p.noise(p.location.x + this.noiseOffset, p.location.y + this.noiseOffset), 0, 1, 200, 500);
+    const newFrequency = this.pService.p.map(
+      this.pService.p.noise(p.location.x + this.noiseOffset, p.location.y + this.noiseOffset), 0, 1, 200, 500);
     return newFrequency;
   }
 
@@ -125,6 +126,10 @@ export class PlanetService {
       p.velocity.x = this.pService.p.random(-max, max);
       p.velocity.y = this.pService.p.random(-max, max);
     });
+  }
+
+  updateBoundries(canvas: p5.Vector) {
+    this.planets$.value.forEach(m => m.setBounds(canvas));
   }
 
   generateWallCollisions() {
@@ -207,7 +212,7 @@ export class PlanetService {
   }
 
   fadeNotesTowardDestination() {
-    const diff = 6;
+    const diff = 10;
 
     this.planetNotes = this.planetNotes.map((n, i) => {
       if (this.planetNotes[i] < this.planetNotesDestination[i]) {

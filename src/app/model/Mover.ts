@@ -35,6 +35,10 @@ export class Mover {
     return this.diameter / 2;
   }
 
+  setBounds(v: p5.Vector) {
+    this.bounds = v.copy();
+  }
+
   setLocation(x = 0, y = 0) {
     this.location.x = (x - this.radius < 0)
       ? 0 + + this.radius

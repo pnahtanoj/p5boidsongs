@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, HostListener } from '@angular/core';
 import * as p5 from 'p5';
 import "p5/lib/addons/p5.sound";
 import "p5/lib/addons/p5.dom";
@@ -7,6 +7,8 @@ import { MoverManagerService } from './services/mover-manager.service';
 import { PlanetService } from './services/planet.service';
 import { ColorService } from './services/color.service';
 import { tap, skip } from 'rxjs/operators';
+import { BehaviorSubject } from 'rxjs';
+
 
 const canvas: p5.Vector = new p5.Vector();
 canvas.x = 1600;
@@ -30,13 +32,19 @@ const topSpeed = 30;
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
+  resize$: BehaviorSubject<{ width: number, height: number }> =
+    new BehaviorSubject({ width: window.innerWidth, height: window.innerHeight });
   p5: any;
   closure = 'TETING!@';
 
   bg: p5.Color;
   bgDestination: p5.Color;
 
+  @HostListener('window:resize', ['$event'])
+  onResize(event?) {
+    this.resize$.next({ width: event.target.innerWidth, height: event.target.innerHeight });
+  }
   constructor(
     private pService: PService,
     private movers: MoverManagerService,
@@ -46,7 +54,17 @@ export class AppComponent {
   }
 
   ngOnInit() {
+    console.log(window);
     this.createCanvas();
+
+    this.resize$.pipe(
+      tap(size => {
+        canvas.x = size.width;
+        canvas.y = size.height;
+        this.p5.resizeCanvas(size.width, size.height);
+        this.planets.updateBoundries(canvas);
+      })
+    ).subscribe();
   }
 
   private createCanvas() {
@@ -72,13 +90,15 @@ export class AppComponent {
         .pipe(
           skip(1),
           tap(c => this.bgDestination = this.color.getFloorColor()))
-        .subscribe()
+        .subscribe();
 
       this.planets.generateNonOverlapping(10, [150, 250], canvas);
       this.planets.setRandomSpeeds(0.2);
       this.planets.initKey();
 
-      p.createCanvas(canvas.x, canvas.y);
+      const c = p.createCanvas(canvas.x, canvas.y);
+      // c.style('display', 'block');
+
 
       // countSlider = p.createSlider(1, topCount, startingMoverCount);
       // countSlider.position(countSliderLocation.x + 20, countSliderLocation.y);
