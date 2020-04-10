@@ -62,10 +62,11 @@ export class PlanetService {
       filter.freq(400);
       filter.res(2);
 
-      osc.setType('sawtooth');
+      osc.setType('triangle');
       osc.amp(0.5);
       osc.disconnect();
       osc.connect(filter);
+      osc.pan(0, 0);
       osc.start();
       osc.freq(note);
 
@@ -89,10 +90,17 @@ export class PlanetService {
     this.planetNotesDestination[2] = this.notes.getFrequency(this.currentKey, this.currentScale, selectedInversion[2], this.pService.p.random(4, 6));
   }
 
-  getFilterValue() {
+  getPan(p: Mover) {
+    return this.pService.p.map(p.location.x + p.location.y, 0, 2400, -1, 1);
+  }
+
+  getAmplitude(p: Mover) {
+    return this.pService.p.map(p.location.x + p.location.y, 0, 2400, 0.0, 0.999);
+  }
+
+  getFilterValue(p: Mover) {
     this.noiseOffset += 0.1;
-    const newFrequency = this.pService.p.map(this.pService.p.noise(this.noiseOffset), 0, 1, 200, 500);
-    console.log(newFrequency);
+    const newFrequency = this.pService.p.map(this.pService.p.noise(p.location.x + this.noiseOffset, p.location.y + this.noiseOffset), 0, 1, 200, 500);
     return newFrequency;
   }
 
@@ -169,9 +177,13 @@ export class PlanetService {
   }
 
   updateFilters() {
-    this.planetNotePlayers.forEach(p => {
-      p.filter.freq(this.getFilterValue())
-    })
+    this.planetNotePlayers.forEach((p, i) => {
+      const planet = this.planets$.getValue()[i];
+      p.filter.freq(this.getFilterValue(planet));
+      p.osc.amp(this.getAmplitude(planet));
+      p.osc.pan(this.getPan(planet));
+    });
+    console.log('');
   }
 
   updateColors() {

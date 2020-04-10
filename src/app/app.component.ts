@@ -74,8 +74,8 @@ export class AppComponent {
           tap(c => this.bgDestination = this.color.getFloorColor()))
         .subscribe()
 
-      this.planets.generateNonOverlapping(3, [150, 250], canvas);
-      this.planets.setRandomSpeeds(0.8);
+      this.planets.generateNonOverlapping(10, [150, 250], canvas);
+      this.planets.setRandomSpeeds(0.2);
       this.planets.initKey();
 
       p.createCanvas(canvas.x, canvas.y);
