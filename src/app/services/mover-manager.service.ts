@@ -65,7 +65,7 @@ export class MoverManagerService {
         tap(([collisions, boids, planets]) => this.compensateOverlapPlanetBoidCollisions(boids, planets, collisions)),
         tap(([collisions, boids, planets]) => this.adjustVelocityPlanetCollisions(boids, planets, collisions))
       )
-      .subscribe()
+      .subscribe();
   }
 
   generateRandomVector(xLimit: number, yLimit: number) {

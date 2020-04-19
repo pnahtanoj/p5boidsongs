@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import * as p5 from 'p5';
-import "p5/lib/addons/p5.sound";
-import "p5/lib/addons/p5.dom";
+import 'p5/lib/addons/p5.sound';
+import 'p5/lib/addons/p5.dom';
 
 import { Mover } from '../model/Mover';
 import { PService } from './p.service';
@@ -13,16 +13,19 @@ import { ColorService } from './color.service';
 import { Notes, NumberToNotes } from '../model/Notes';
 import { NoteService } from '../service/note.service';
 import { Scale } from '../model/Scale';
+import { ConfigurationService } from './configuration.service';
+import { Configuration } from '../model/Configuration';
 
 @Injectable({
   providedIn: 'root'
 })
 export class PlanetService {
+  maxAmplitude = 0.05;
   collisionOccured$: BehaviorSubject<any> = new BehaviorSubject({});
 
   planets$: BehaviorSubject<Mover[]> = new BehaviorSubject([]);
   planetWallCollisions$: BehaviorSubject<EdgeCollisions[]> = new BehaviorSubject([]);
-  planetCollisions: boolean = false; // [number, number][] = [];
+  planetCollisions = false; // [number, number][] = [];
   planetColors: p5.Color[] = [];
   planetColorsDestination: p5.Color[] = [];
 
@@ -39,16 +42,28 @@ export class PlanetService {
     private pService: PService,
     private mover: MoverService,
     private color: ColorService,
-    private notes: NoteService
+    private notes: NoteService,
+    private configuration: ConfigurationService
   ) {
+    this.configuration.config$
+      .pipe(
+        tap(c => this.configurationUpdate(c))
+      )
+      .subscribe();
 
-    // here?
     this.planetWallCollisions$
       .pipe(
         withLatestFrom(this.planets$),
         tap(([collisions, planets]) => this.planets$.next(this.mover.adjustVelocityEdgeCollision(planets, collisions)))
       )
       .subscribe();
+  }
+
+  configurationUpdate(c: Configuration) {
+    console.log(c);
+    this.updateBoundries(c.windowWidth, c.windowHeight);
+    this.maxAmplitude = c.volume * 0.01;
+    // this.generateNonOverlapping(c.planetCount, c.planetSizeRange, );
   }
 
   initKey() {
@@ -63,7 +78,7 @@ export class PlanetService {
       filter.res(2);
 
       osc.setType('triangle');
-      osc.amp(0.5);
+      osc.amp(this.maxAmplitude);
       osc.disconnect();
       osc.connect(filter);
       osc.pan(0, 0);
@@ -74,7 +89,7 @@ export class PlanetService {
         osc,
         filter,
         note
-      }
+      };
     });
   }
 
@@ -85,9 +100,12 @@ export class PlanetService {
     const inversions = [[1, 3, 5], [1, 5, 3], [3, 5, 1], [3, 1, 5], [5, 1, 3], [5, 3, 1]];
     const selectedInversion = inversions[Math.floor(this.pService.p.random(1, 4))];
 
-    this.planetNotesDestination[0] = this.notes.getFrequency(this.currentKey, this.currentScale, selectedInversion[0], this.pService.p.random(4, 6));
-    this.planetNotesDestination[1] = this.notes.getFrequency(this.currentKey, this.currentScale, selectedInversion[1], this.pService.p.random(4, 6));
-    this.planetNotesDestination[2] = this.notes.getFrequency(this.currentKey, this.currentScale, selectedInversion[2], this.pService.p.random(4, 6));
+    this.planetNotesDestination[0] =
+      this.notes.getFrequency(this.currentKey, this.currentScale, selectedInversion[0], this.pService.p.random(4, 6));
+    this.planetNotesDestination[1] =
+      this.notes.getFrequency(this.currentKey, this.currentScale, selectedInversion[1], this.pService.p.random(4, 6));
+    this.planetNotesDestination[2] =
+      this.notes.getFrequency(this.currentKey, this.currentScale, selectedInversion[2], this.pService.p.random(4, 6));
   }
 
   getPan(p: Mover) {
@@ -95,10 +113,11 @@ export class PlanetService {
   }
 
   getAmplitude(p: Mover) {
-    return this.pService.p.map(p.location.x + p.location.y, 0, 2400, 0.0, 0.999);
+    return this.pService.p.map(p.location.x + p.location.y, 0, 2400, 0.0, this.maxAmplitude);
   }
 
   getFilterValue(p: Mover) {
+    // console.log(p);
     this.noiseOffset += 0.1;
     const newFrequency = this.pService.p.map(
       this.pService.p.noise(p.location.x + this.noiseOffset, p.location.y + this.noiseOffset), 0, 1, 200, 500);
@@ -128,7 +147,10 @@ export class PlanetService {
     });
   }
 
-  updateBoundries(canvas: p5.Vector) {
+  updateBoundries(width: number, height: number) {
+    const canvas = new p5.Vector();
+    canvas.x = width;
+    canvas.y = height;
     this.planets$.value.forEach(m => m.setBounds(canvas));
   }
 
@@ -188,7 +210,6 @@ export class PlanetService {
       p.osc.amp(this.getAmplitude(planet));
       p.osc.pan(this.getPan(planet));
     });
-    console.log('');
   }
 
   updateColors() {
@@ -212,7 +233,7 @@ export class PlanetService {
   }
 
   fadeNotesTowardDestination() {
-    const diff = 10;
+    const diff = 20;
 
     this.planetNotes = this.planetNotes.map((n, i) => {
       if (this.planetNotes[i] < this.planetNotesDestination[i]) {
